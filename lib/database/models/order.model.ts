@@ -1,6 +1,8 @@
 import { Schema, model, models, Document } from 'mongoose';
 
+// Documento de interfaz para poder acceder a las propiedades del Schema
 export interface IOrder extends Document {
+    // Propiedades
     createdAt: Date
     stripeId: string
     totalAmount: string
@@ -15,6 +17,7 @@ export interface IOrder extends Document {
     }
 }
 
+// Type para definir el item del pedido (el Evento)
 export type IOrderItem = {
     _id: string
     totalAmount: string
@@ -24,7 +27,9 @@ export type IOrderItem = {
     buyer: string
 }
 
+// Definiendo el Schema
 const OrderSchema = new Schema({
+    /* Definiendolas propiedades */
     createdAt: {
         type: Date,
         default: Date.now,
@@ -47,6 +52,7 @@ const OrderSchema = new Schema({
     },
 });
 
+// Creando el modelo basado en el Schema
 const Order = models.Order || model('Order', OrderSchema);
 
 export default Order;
