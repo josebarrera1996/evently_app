@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import * as z from "zod";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
@@ -21,7 +22,9 @@ import { Input } from "@/components/ui/input";
 import Dropdown from "./Dropdown";
 import { Textarea } from "../ui/textarea";
 import { FileUploader } from "./FileUploader";
+import { useUploadThing } from "@/lib/uploadthing";
 import { Checkbox } from "../ui/checkbox";
+import { createEvent } from "@/lib/actions/event.actions";
 
 // Propiedades que utilizará este componente
 type EventFormProps = {
@@ -37,14 +40,63 @@ const EventForm = ({ userId, type }: EventFormProps) => {
   // Valores iniciales para los campos del formularo
   const initialValues = eventDefaultValues;
 
+  // Manejar la navegación entre rutas
+  const router = useRouter();
+
+  // Variable para poder dar comienzo a la carga de la imagen
+  const { startUpload } = useUploadThing("imageUploader");
+
+  // Manejando los valores asignados a los campos del formulario
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: initialValues,
   });
 
-  function onSubmit(values: z.infer<typeof eventFormSchema>) {
+  async function onSubmit(values: z.infer<typeof eventFormSchema>) {
+    // Obtener la imagen a subir
+    let uploadedImageUrl = values.imageUrl;
+
+    // Chequear si el usuario a subido alguna imagen
+    if (files.length > 0) {
+      // Prepara la subida de la imagen
+      const uploadedImages = await startUpload(files);
+
+      // Chequear si se ha logrado subir correctamente
+      if (!uploadedImages) {
+        return;
+      }
+
+      // Si se subió, obtener solo la 'url' de la misma
+      uploadedImageUrl = uploadedImages[0].url;
+    }
+
     console.log("Datos a enviar:");
     console.log(values);
+
+    /* Una vez logrado lo que es la suba de la imagen... */
+
+    if (type === "Create") {
+      try {
+        // Preparar el nuevo evento a crear y guardarlo en la b.d
+        const newEvent = await createEvent({
+          // Pasarle todos los valores de las propiedades (con la url de la imagen subida)
+          event: { ...values, imageUrl: uploadedImageUrl },
+          // El id del usuario que lo crea
+          userId,
+          // Revalidar el siguiente path
+          path: "/profile",
+        });
+
+        // Si se creó correctamente...
+        if (newEvent) {
+          // Resetear los campos del formulario y redireccionarnos al evento creado
+          form.reset();
+          router.push(`/events/${newEvent._id}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useState, startTransition } from "react";
+import { useState, useEffect, startTransition } from "react";
 import {
   Select,
   SelectContent,
@@ -19,6 +19,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "../ui/input";
 import { ICategory } from "@/lib/database/models/category.model";
+import {
+  createCategory,
+  getAllCategories,
+} from "@/lib/actions/category.actions";
 
 // Propiedades del componente
 type DropdownProps = {
@@ -31,10 +35,28 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [newCategory, setNewCategory] = useState("");
 
+  // Hook para manejar las categorías
+  useEffect(() => {
+    // Obtener todas las categorías
+    const getCategories = async () => {
+      // Ejecutar la acción
+      const categoryList = await getAllCategories();
+
+      // Si hay categorías, actualizar el estado para mostrarlas
+      categoryList && setCategories(categoryList as ICategory[]);
+    };
+    getCategories();
+  }, []);
+
   // Lógica para añadir una nueva categoría a las ya existentes
   const handleAddCategory = () => {
-    
-  }
+    // Creamos una nueva categoría y la colocamos al final de todas las que hay
+    createCategory({
+      categoryName: newCategory.trim(),
+    }).then((category) => {
+      setCategories((prevState) => [...prevState, category]);
+    });
+  };
 
   return (
     <Select onValueChange={onChangeHandler} defaultValue={value}>

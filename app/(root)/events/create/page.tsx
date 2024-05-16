@@ -8,6 +8,7 @@ const CreateEvent = () => {
 
   // Obtener el id del usuario logeado
   const userId = sessionClaims?.userId as string;
+  console.log(userId);
 
   return (
     <>
