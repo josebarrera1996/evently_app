@@ -1,5 +1,6 @@
 import React from "react";
 import { IEvent } from "@/lib/database/models/event.model";
+import Card from "./Card";
 
 // Propiedades de este componente
 type CollectionProps = {
@@ -37,11 +38,11 @@ const Collection = ({
 
               return (
                 <li key={event._id} className="flex justify-center">
-                  {/* <Card
+                  <Card
                     event={event}
                     hasOrderLink={hasOrderLink}
                     hidePrice={hidePrice}
-                  /> */}
+                  />
                 </li>
               );
             })}
