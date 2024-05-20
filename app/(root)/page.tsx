@@ -1,8 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Collection from "@/components/shared/Collection";
+import { getAllEvents } from "@/lib/actions/event.actions";
 
-export default function Home() {
+export default async function Home() {
+
+
+  // Obtener todos los Event
+  const events = await getAllEvents({
+    // Parámetros
+    query: '',
+    category: '',
+    page: 1,
+    limit: 6,
+  });
+
+  console.log('Eventos');
+  console.log(events);
+
   return (
     <>
       {/* Hero section */}
@@ -41,9 +57,19 @@ export default function Home() {
         </h2>
 
         <div className="flex w-full flex-col gap-5 md:flex-row">
-          Search 
-          CategoryFilter
+          Search CategoryFilter
         </div>
+
+        {/* Lista de los eventos */}
+        <Collection
+          data={events?.data}
+          emptyTitle="No Events Found"
+          emptyStateSubtext="Come back later"
+          collectionType="All_Events"
+          limit={6}
+          page={1}
+          totalPages={2}
+        />
       </section>
     </>
   );
