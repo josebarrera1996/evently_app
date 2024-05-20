@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { IEvent } from "@/lib/database/models/event.model";
 import { formatDateTime } from "@/lib/utils";
+import { DeleteConfirmation } from "./DeleteConfirmation";
 
 // Propiedades de este componente
 type CardProps = {
@@ -42,7 +43,7 @@ const Card = ({ event, hasOrderLink, hidePrice }: CardProps) => {
             />
           </Link>
           {/* Si el usuario logeado es el organizador del evento, podrá eliminarlo */}
-          {/* <DeleteConfirmation eventId={event._id} /> */}
+          <DeleteConfirmation eventId={event._id} />
         </div>
       )}
 
