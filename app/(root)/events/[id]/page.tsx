@@ -1,13 +1,21 @@
 import Image from "next/image";
 import { SearchParamProps } from "@/types";
-import { getEventById } from "@/lib/actions/event.actions";
+import { getEventById, getRelatedEventsByCategory } from "@/lib/actions/event.actions";
 import { formatDateTime } from "@/lib/utils";
+import Collection from "@/components/shared/Collection";
 
 // Componente que renderizará la info de un Event
-const EventDetails = async ({ params: { id } }: SearchParamProps) => {
+const EventDetails = async ({ params: { id }, searchParams }: SearchParamProps) => {
   // Obtener los datos del Event
   const event = await getEventById(id);
   // console.log(event);
+
+  // Obtener los Event relacionados a la categoría de este Event
+  const relatedEvents = await getRelatedEventsByCategory({
+    categoryId: event.category._id,
+    eventId: event._id,
+    page: searchParams.page as string,
+  });
 
   return (
     <>
@@ -89,7 +97,19 @@ const EventDetails = async ({ params: { id } }: SearchParamProps) => {
         </div>
       </section>
       {/* Eventos con la misma categoría */}
-      
+      <section className="wrapper my-8 flex flex-col gap-8 md:gap-12">
+        <h2 className="h2-bold">Related Events</h2>
+
+        <Collection
+          data={relatedEvents?.data}
+          emptyTitle="No Events Found"
+          emptyStateSubtext="Come back later"
+          collectionType="All_Events"
+          limit={6}
+          page={1}
+          totalPages={2}
+        />
+      </section>
     </>
   );
 };
