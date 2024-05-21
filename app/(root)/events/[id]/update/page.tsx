@@ -1,13 +1,24 @@
-import EventForm from "@/components/shared/EventForm";
 import { auth } from "@clerk/nextjs";
+import EventForm from "@/components/shared/EventForm";
+import { getEventById } from "@/lib/actions/event.actions";
+
+// Propiedades de este componente
+type UpdateEventProps = {
+  params: {
+    id: string;
+  };
+};
 
 // Componente para poder actualizar un Evento
-const UpdateEvent = () => {
+const UpdateEvent = async ({ params: { id } }: UpdateEventProps) => {
   // Constante para manejar las propiedades del usuario logeado
   const { sessionClaims } = auth();
 
   // Obtener el id del usuario logeado
   const userId = sessionClaims?.userId as string;
+
+  // Obtener los datos del Event (por su ID)
+  const event = await getEventById(id);
 
   return (
     <>
@@ -23,7 +34,12 @@ const UpdateEvent = () => {
          * Se le pasará el id del usuario que está interactuando con el formulario
          * Se le pasará el tipo de 'event'
          */}
-        <EventForm userId={userId} type="Update" />
+        <EventForm
+          type="Update"
+          event={event}
+          eventId={event._id}
+          userId={userId}
+        />
       </div>
     </>
   );

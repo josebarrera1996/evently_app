@@ -139,29 +139,40 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
     }
 }
 
-// GET EVENTS BY ORGANIZER
+// Lógica para poder obtener los Event por el usuario organizador
 export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
     try {
-        await connectToDatabase()
+        // Conexión a la base de datos
+        await connectToDatabase();
 
-        const conditions = { organizer: userId }
-        const skipAmount = (page - 1) * limit
+        // Condición de búsqueda para filtrar eventos por el organizador (userId)
+        const conditions = { organizer: userId };
 
+        // Cálculo de la cantidad de documentos a omitir basado en la paginación
+        const skipAmount = (page - 1) * limit;
+
+        // Construcción de la consulta para obtener los eventos con las condiciones dadas,
+        // ordenando por fecha de creación en orden descendente, aplicando paginación
         const eventsQuery = Event.find(conditions)
             .sort({ createdAt: 'desc' })
             .skip(skipAmount)
-            .limit(limit)
+            .limit(limit);
 
-        const events = await populateEvent(eventsQuery)
-        const eventsCount = await Event.countDocuments(conditions)
+        // Popular los campos relacionados en la consulta de eventos
+        const events = await populateEvent(eventsQuery);
 
-        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+        // Contar el total de documentos que coinciden con las condiciones de búsqueda
+        const eventsCount = await Event.countDocuments(conditions);
+
+        // Devolver los eventos obtenidos y el número total de páginas
+        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) };
     } catch (error) {
-        handleError(error)
+        // Invocar manejador de errores
+        handleError(error);
     }
 }
 
-// GET RELATED EVENTS: EVENTS WITH SAME CATEGORY
+// Lógica para poder obtener los Event con la misma categoría. Es decir, eventos relacionados
 export async function getRelatedEventsByCategory({
     categoryId,
     eventId,
@@ -169,22 +180,35 @@ export async function getRelatedEventsByCategory({
     page = 1,
 }: GetRelatedEventsByCategoryParams) {
     try {
-        await connectToDatabase()
+        // Conexión a la base de datos
+        await connectToDatabase();
 
-        const skipAmount = (Number(page) - 1) * limit
-        const conditions = { $and: [{ category: categoryId }, { _id: { $ne: eventId } }] }
+        // Cálculo de la cantidad de documentos a omitir basado en la paginación
+        const skipAmount = (Number(page) - 1) * limit;
 
+        // Condiciones de búsqueda:
+        // 1. Los eventos deben pertenecer a la misma categoría (categoryId)
+        // 2. El evento no debe ser el mismo que el evento actual (eventId)
+        const conditions = { $and: [{ category: categoryId }, { _id: { $ne: eventId } }] };
+
+        // Construcción de la consulta para obtener los eventos relacionados con las condiciones dadas,
+        // ordenando por fecha de creación en orden descendente, aplicando paginación
         const eventsQuery = Event.find(conditions)
             .sort({ createdAt: 'desc' })
             .skip(skipAmount)
-            .limit(limit)
+            .limit(limit);
 
-        const events = await populateEvent(eventsQuery)
-        const eventsCount = await Event.countDocuments(conditions)
+        // Popular los campos relacionados en la consulta de eventos
+        const events = await populateEvent(eventsQuery);
 
-        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+        // Contar el total de documentos que coinciden con las condiciones de búsqueda
+        const eventsCount = await Event.countDocuments(conditions);
+
+        // Devolver los eventos obtenidos y el número total de páginas
+        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) };
     } catch (error) {
-        handleError(error)
+        // Invocar manejador de errores
+        handleError(error);
     }
 }
 

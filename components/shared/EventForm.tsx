@@ -24,21 +24,33 @@ import { Textarea } from "../ui/textarea";
 import { FileUploader } from "./FileUploader";
 import { useUploadThing } from "@/lib/uploadthing";
 import { Checkbox } from "../ui/checkbox";
-import { createEvent } from "@/lib/actions/event.actions";
+import { createEvent, updateEvent } from "@/lib/actions/event.actions";
+import { IEvent } from "@/lib/database/models/event.model";
 
 // Propiedades que utilizará este componente
 type EventFormProps = {
   userId: string;
   type: "Create" | "Update";
+  event?: IEvent;
+  eventId?: string;
 };
 
 // Formulario para creaer el Evento
-const EventForm = ({ userId, type }: EventFormProps) => {
+const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
   // Estado para manejar los archivos subidos
   const [files, setFiles] = useState<File[]>([]);
 
   // Valores iniciales para los campos del formularo
-  const initialValues = eventDefaultValues;
+  const initialValues =
+    event && type === "Update"
+      ? // En caso de que sea 'Update' inicializar los datos del Event
+        {
+          ...event,
+          startDateTime: new Date(event.startDateTime),
+          endDateTime: new Date(event.endDateTime),
+        }
+      : // En caso de que sea 'Create' utilizar los valores por defecto
+        eventDefaultValues;
 
   // Manejar la navegación entre rutas
   const router = useRouter();
@@ -94,6 +106,35 @@ const EventForm = ({ userId, type }: EventFormProps) => {
           router.push(`/events/${newEvent._id}`);
         }
       } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (type === "Update") {
+      // Verificar si se proporciona el ID del evento
+      if (!eventId) {
+        // Si no hay ID del evento, regresar a la página anterior
+        router.back();
+        return;
+      }
+
+      try {
+        // Intentar actualizar el evento con los nuevos valores
+        const updatedEvent = await updateEvent({
+          userId, // ID del usuario que realiza la actualización
+          event: { ...values, imageUrl: uploadedImageUrl, _id: eventId }, // Datos del evento actualizados
+          path: `/events/${eventId}`, // Ruta del evento a actualizar al revalidarla
+        });
+
+        // Si el evento se actualiza correctamente
+        if (updatedEvent) {
+          // Resetear el formulario
+          form.reset();
+          // Redirigir a la página del evento actualizado
+          router.push(`/events/${updatedEvent._id}`);
+        }
+      } catch (error) {
+        // Capturar y mostrar cualquier error que ocurra durante la actualización
         console.log(error);
       }
     }
