@@ -4,12 +4,20 @@ import { SearchParamProps } from "@/types";
 import { Button } from "@/components/ui/button";
 import Collection from "@/components/shared/Collection";
 import { getEventsByUser } from "@/lib/actions/event.actions";
+import { getOrdersByUser } from "@/lib/actions/order.actions";
+import { IOrder } from "@/lib/database/models/order.model";
 
 // Componente para representar el perfil del usuario logeado
 const ProfilePage = async ({ searchParams }: SearchParamProps) => {
   // Datos del usuario logeado
   const { sessionClaims } = auth();
   const userId = sessionClaims?.userId as string;
+
+  // Obtener las Orders realizadas por el User
+  const orders = await getOrdersByUser({ userId, page: 1 });
+
+  // Mapear las Orders para obtener solo la información del Event
+  const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
 
   // Obtener los Event del usuario organizador (el logeado)
   const organizedEvents = await getEventsByUser({ userId, page: 1 });
@@ -25,9 +33,9 @@ const ProfilePage = async ({ searchParams }: SearchParamProps) => {
           </Button>
         </div>
       </section>
-      {/* <section className="wrapper my-8">
+      <section className="wrapper my-8">
         <Collection
-          data={organizedEvents?.data}
+          data={orderedEvents}
           emptyTitle="No event tickets purchased yet"
           emptyStateSubtext="No worries - plenty of exciting events to explore!"
           collectionType="My_Tickets"
@@ -36,7 +44,7 @@ const ProfilePage = async ({ searchParams }: SearchParamProps) => {
           urlParamName="ordersPage"
           totalPages={2}
         />
-      </section> */}
+      </section>
 
       {/* Eventos organizados */}
       <section className="bg-primary-50 bg-dotted-pattern bg-cover bg-center py-5 md:py-10">
