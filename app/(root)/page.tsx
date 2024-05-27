@@ -1,23 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SearchParamProps } from "@/types";
+import { getAllEvents } from "@/lib/actions/event.actions";
 import { Button } from "@/components/ui/button";
 import Collection from "@/components/shared/Collection";
-import { getAllEvents } from "@/lib/actions/event.actions";
+import Search from "@/components/shared/Search";
 
-export default async function Home() {
+export default async function Home({ searchParams }: SearchParamProps) {
+  // Obteniendo la página
+  const page = Number(searchParams?.page) || 1;
 
+  // Obteniendo lo buscado por el campo de búsqueda
+  const searchText = (searchParams?.query as string) || "";
+
+  // Obteniendo la categoría para filtrar
+  const category = (searchParams?.category as string) || "";
 
   // Obtener todos los Event
   const events = await getAllEvents({
     // Parámetros
-    query: '',
-    category: '',
-    page: 1,
+    query: searchText,
+    category,
+    page,
     limit: 6,
   });
 
-  console.log('Eventos');
-  console.log(events);
+  // console.log("Eventos");
+  // console.log(events);
 
   return (
     <>
@@ -57,7 +66,8 @@ export default async function Home() {
         </h2>
 
         <div className="flex w-full flex-col gap-5 md:flex-row">
-          Search CategoryFilter
+          <Search />
+          CategoryFilter
         </div>
 
         {/* Lista de los eventos */}
