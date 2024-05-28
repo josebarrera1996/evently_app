@@ -5,6 +5,7 @@ import { getAllEvents } from "@/lib/actions/event.actions";
 import { Button } from "@/components/ui/button";
 import Collection from "@/components/shared/Collection";
 import Search from "@/components/shared/Search";
+import CategoryFilter from "@/components/shared/CategoryFilter";
 
 export default async function Home({ searchParams }: SearchParamProps) {
   // Obteniendo la página
@@ -67,7 +68,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
 
         <div className="flex w-full flex-col gap-5 md:flex-row">
           <Search />
-          CategoryFilter
+          <CategoryFilter />
         </div>
 
         {/* Lista de los eventos */}
